@@ -135,7 +135,12 @@ Sequence::evalAsync()
 
     this->mDevice->resetFences({ this->mFence });
 
-    this->submitCommandBuffer(submitInfo);
+    try {
+        this->submitCommandBuffer(submitInfo);
+    } catch (const vk::DeviceLostError&) {
+        this->mIsRunning = false;
+        throw;
+    }
 
     return shared_from_this();
 }
@@ -168,8 +173,13 @@ Sequence::evalAwait(uint64_t waitFor)
         return shared_from_this();
     }
 
-    vk::Result result =
-      this->mDevice->waitForFences(1, &this->mFence, VK_TRUE, waitFor);
+    vk::Result result;
+    try {
+        result = this->mDevice->waitForFences(1, &this->mFence, VK_TRUE, waitFor);
+    } catch (const vk::DeviceLostError&) {
+        this->mIsRunning = false;
+        throw;
+    }
 
     this->mIsRunning = false;
 

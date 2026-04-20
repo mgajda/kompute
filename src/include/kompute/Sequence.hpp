@@ -106,6 +106,8 @@ class Sequence : public std::enable_shared_from_this<Sequence>
      * operations into the gpu as a submit job synchronously (with a barrier).
      *
      * @return shared_ptr<Sequence> of the Sequence class itself
+     * @throws vk::DeviceLostError if the GPU device is lost during
+     *         submission or waiting for execution
      */
     std::shared_ptr<Sequence> eval();
 
@@ -216,6 +218,8 @@ class Sequence : public std::enable_shared_from_this<Sequence>
      *
      * @param waitFor Number of milliseconds to wait before timing out.
      * @return shared_ptr<Sequence> of the Sequence class itself
+     * @throws vk::DeviceLostError if the GPU device is lost while waiting
+     *         for the fence to complete
      */
     std::shared_ptr<Sequence> evalAwait(uint64_t waitFor = UINT64_MAX);
 
