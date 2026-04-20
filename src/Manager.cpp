@@ -51,7 +51,8 @@ Manager::Manager()
 
 Manager::Manager(uint32_t physicalDeviceIndex,
                  const std::vector<uint32_t>& familyQueueIndices,
-                 const std::vector<std::string>& desiredExtensions)
+                 const std::vector<std::string>& desiredExtensions,
+                 const void* desiredFeaturesChain)
 {
     this->mManageResources = true;
 
@@ -65,8 +66,10 @@ Manager::Manager(uint32_t physicalDeviceIndex,
 #endif
 
     this->createInstance();
-    this->createDevice(
-      familyQueueIndices, physicalDeviceIndex, desiredExtensions);
+    this->createDevice(familyQueueIndices,
+                       physicalDeviceIndex,
+                       desiredExtensions,
+                       desiredFeaturesChain);
 }
 
 Manager::Manager(std::shared_ptr<vk::Instance> instance,
@@ -336,7 +339,8 @@ Manager::clear()
 void
 Manager::createDevice(const std::vector<uint32_t>& familyQueueIndices,
                       uint32_t physicalDeviceIndex,
-                      const std::vector<std::string>& desiredExtensions)
+                      const std::vector<std::string>& desiredExtensions,
+                      const void* desiredFeaturesChain)
 {
 
     KP_LOG_DEBUG("Kompute Manager creating Device");
@@ -477,6 +481,8 @@ Manager::createDevice(const std::vector<uint32_t>& familyQueueIndices,
                                           {},
                                           validExtensions.size(),
                                           validExtensions.data());
+
+    deviceCreateInfo.pNext = desiredFeaturesChain;
 
     this->mDevice = std::make_shared<vk::Device>();
     physicalDevice.createDevice(
